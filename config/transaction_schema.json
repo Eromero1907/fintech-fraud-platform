@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FinancialTransaction",
+  "description": "Esquema estándar de transacciones bancarias en tiempo real",
+  "type": "object",
+  "properties": {
+    "transaction_id": {"type": "string", "format": "uuid"},
+    "card_id": {"type": "string"},
+    "customer_id": {"type": "string"},
+    "amount": {"type": "number", "minimum": 0.01},
+    "currency": {"type": "string", "enum": ["USD", "COP", "EUR"]},
+    "amount_usd": {"type": "number", "minimum": 0.01},
+    "merchant_id": {"type": "string"},
+    "merchant_name": {"type": "string"},
+    "merchant_category": {
+      "type": "string",
+      "enum": ["grocery", "restaurant", "travel", "electronics", "luxury", "gas_station", "atm_cash"]
+    },
+    "channel": {"type": "string", "enum": ["POS", "WEB", "ATM"]},
+    "country": {"type": "string", "minLength": 2, "maxLength": 3},
+    "city": {"type": "string"},
+    "latitude": {"type": "number", "minimum": -90.0, "maximum": 90.0},
+    "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "is_fraud_scenario": {
+      "type": "string",
+      "enum": ["NONE", "IMPOSSIBLE_TRAVEL", "BOT_BURST", "AML_STRUCTURING"]
+    }
+  },
+  "required": [
+    "transaction_id",
+    "card_id",
+    "customer_id",
+    "amount",
+    "currency",
+    "amount_usd",
+    "channel",
+    "country",
+    "latitude",
+    "longitude",
+    "timestamp"
+  ]
+}

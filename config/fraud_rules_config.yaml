@@ -1,0 +1,40 @@
+# Configuración de Reglas de Detección de Fraude (Stateful CEP)
+streaming:
+  microbatch_duration_seconds: 3
+  watermark_delay_seconds: 10
+
+rules:
+  impossible_travel:
+    enabled: true
+    max_physical_speed_kmh: 900.0   # Velocidad de avión comercial
+    min_distance_threshold_km: 50.0 # Ignorar micro-desplazamientos de GPS
+    state_timeout_minutes: 30       # Retener estado de la tarjeta por 30 minutos
+
+  bot_burst:
+    enabled: true
+    window_duration_seconds: 30     # Ventana de evaluación
+    min_transaction_count: 4        # 4 o más transacciones consecutivas
+    max_amount_usd: 5.0             # Micro-transacciones típicamente usadas por bots
+    state_timeout_seconds: 60
+
+  aml_structuring:
+    enabled: true
+    window_duration_hours: 1        # Ventana de 1 hora
+    min_suspicious_amount_cop: 9000000.0  # Justo por debajo del umbral de $10M
+    max_suspicious_amount_cop: 9999999.0
+    min_transaction_count: 3        # 3 o más transacciones para eludir reporte
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  transactions_topic: "financial-transactions"
+  alerts_topic: "fraud-alerts"
+  partitions: 3
+
+s3_medallion:
+  bucket: "book-store-datalake-182832138582"
+  prefix: "fintech_project"
+  raw_path: "raw/transactions"
+  silver_path: "silver/transactions_curated"
+  gold_fraud_alerts: "gold/fraud_alerts_history"
+  gold_merchant_risk: "gold/merchant_risk_ranking"
+  gold_kpis: "gold/daily_financial_kpis"

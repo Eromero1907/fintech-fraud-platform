@@ -1,0 +1,21 @@
+# ==============================================================================
+# Dependencias del Proyecto — Plataforma Fintech de Detección de Fraude y AML
+# Asignatura: SI3008 - Sistemas Intensivos en Datos (Universidad EAFIT)
+# ==============================================================================
+
+# Ingesta Streaming (Apache Kafka)
+kafka-python==2.0.2
+confluent-kafka==2.8.2
+
+# Procesamiento Distribuido (Spark Streaming & Batch) y Motor Columnar Parquet
+pyspark==3.5.4
+duckdb==1.5.6
+pyarrow==19.0.0
+
+# Integración Cloud AWS (S3, Glue, Athena, EventBridge)
+boto3==1.36.21
+botocore==1.36.21
+
+# Utilidades y Pruebas
+pyyaml==6.0.2
+pytest==8.3.4

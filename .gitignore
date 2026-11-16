@@ -1,0 +1,22 @@
+# Entornos y Credenciales (NUNCA subir a GitHub)
+.env
+*.pem
+*.key
+.aws/
+
+# Python y Entornos Virtuales
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.pytest_cache/
+
+# Datos Generados Localmente y Checkpoints de Spark
+data/s3_lakehouse/
+data/sample_transactions/
+data/checkpoints/
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
