@@ -69,3 +69,36 @@ El código local funciona de punta a punta; ahora nos falta llevarlo a la nube d
 4. **Material de Sustentación:**
    * Generar el diagrama de arquitectura formal en **draw.io (`.drawio`)** reflejando la VPC, subredes, EC2, Kafka, Spark, S3 Medallion y Athena.
    * Documentar evidencias (capturas de Athena, logs de reconciliación y prueba de resiliencia apagando 1 broker) para la presentación ante el profesor.
+
+---
+
+## 5. Instrucciones: ¿Cómo debe quedar subido en la Nube (AWS)?
+
+Para que el proyecto cumpla al 100% con la exigencia del profesor (sin usar la *Default VPC* de AWS), el despliegue en nuestra cuenta de **AWS Academy** debe quedar montado exactamente con esta topología:
+
+### A. Red y Seguridad (VPC Propia)
+1. **Crear VPC (`vpc-fintech-fraud`, CIDR `10.0.0.0/16`)** con el asistente *VPC and more* (1 Zona de Disponibilidad `us-east-1a`):
+   * **Subred Pública:** Con **Internet Gateway** y **NAT Gateway** (permite que las máquinas privadas descarguen Docker/paquetes sin tener IP pública).
+   * **Subred Privada:** Aislada de internet (sin IP pública).
+   * **VPC Gateway Endpoint para S3:** Asociado a la tabla de rutas privada para que el tráfico entre Spark/EC2 y S3 viaje 100% por la red interna de AWS.
+2. **Crear 3 Security Groups dentro de esa VPC:**
+   * `sg-fintech-bastion`: Permite `SSH (22)` únicamente desde nuestra IP (`My IP`).
+   * `sg-fintech-spark`: Permite `SSH (22)` únicamente desde `sg-fintech-bastion`.
+   * `sg-fintech-kafka`: Permite `SSH (22)` desde `sg-fintech-bastion` y puertos **`19092 - 39092`** desde `sg-fintech-spark`.
+
+### B. Almacenamiento Data Lakehouse (Amazon S3)
+* Crear un bucket en `us-east-1` (ej. `fintech-fraud-lakehouse-<account-id>`) con la carpeta `fintech_project/` y las 5 subcarpetas:
+  * `raw/`, `quarantine/`, `silver/`, `gold/` y `athena-results/`.
+
+### C. Cómputo (3 Instancias EC2 dentro de nuestra VPC)
+| Instancia | Tipo | Subred | IP Pública | IAM Role | Qué corre adentro |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`ec2-fintech-bastion`** | `t3.micro` | Pública | **Sí** | — | Puente SSH seguro (*ProxyJump*) para entrar a las máquinas privadas. |
+| **`ec2-fintech-kafka`** | `t3.large` | Privada | **No** | `LabInstanceProfile` | Clúster Docker **Kafka KRaft de 3 brokers** (puertos `19092, 29092, 39092`) con tópicos `financial-transactions` y `fraud-alerts` (3 particiones, RF=3). |
+| **`ec2-fintech-spark`** | `t3.large` | Privada | **No** | `LabInstanceProfile` | Java 17 + PySpark + código del repo (`financial_producer.py`, `streaming_fraud_detector.py --mode spark` y `batch_medallion_etl.py`). |
+
+### D. Consultas Finales en la Consola de AWS
+1. Abrir **Amazon Athena**, configurar la ubicación de resultados en `s3://<tu-bucket>/fintech_project/athena-results/`.
+2. Ejecutar el script `src/serving/athena_ddl_queries.sql` para registrar las tablas externas en **AWS Glue Data Catalog** (`silver_transactions`, `quarantine_transactions`, `gold_fraud_alerts`, `gold_merchant_risk`, `gold_daily_kpis`).
+3. Ejecutar `MSCK REPAIR TABLE` sobre `silver_transactions` y `quarantine_transactions`, y correr las 4 consultas analíticas de sustentación en vivo.
+
