@@ -84,8 +84,9 @@ class FinancialProducerSimulator:
                     value_serializer=lambda v: json.dumps(v).encode("utf-8"),
                     key_serializer=lambda k: str(k).encode("utf-8") if k else None,
                     acks=1,
-                    linger_ms=5,
-                    batch_size=32768,
+                    linger_ms=20,
+                    batch_size=131072,
+                    buffer_memory=67108864,
                 )
                 logger.info(f"Conectado a Kafka Broker ({self.bootstrap_servers}). Tópico: '{self.topic}'")
             except Exception as e:
@@ -224,13 +225,19 @@ class FinancialProducerSimulator:
         fraud_frequency_seconds: int = 2,
         output_file: Optional[str] = None,
         inject_dirty: bool = True,
+        total_events_target: Optional[int] = None,
     ):
-        """Ejecuta el generador continuo de transacciones controlando la tasa EPS."""
+        """Ejecuta el generador continuo de transacciones controlando EPS o cantidad total de eventos."""
         random.seed(42)
-        logger.info(f"Iniciando emisión a {self.target_eps} EPS | Duración: {duration_seconds}s")
+        if total_events_target:
+            logger.info(f"Iniciando emisión masiva: Meta = {total_events_target:,} eventos | Tasa objetivo: {self.target_eps:,} EPS")
+        else:
+            logger.info(f"Iniciando emisión a {self.target_eps:,} EPS | Duración: {duration_seconds}s")
+
         start_time = time.time()
         sent_events = 0
         last_fraud_injection = start_time
+        last_log_events = 0
         dirty_injected = False
         file_handle = open(output_file, "w", encoding="utf-8") if output_file else None
 
@@ -238,7 +245,13 @@ class FinancialProducerSimulator:
         scenarios_order = ["IMPOSSIBLE_TRAVEL", "BOT_BURST", "AML"]
 
         try:
-            while (time.time() - start_time) < duration_seconds:
+            while True:
+                if total_events_target:
+                    if sent_events >= total_events_target:
+                        break
+                elif (time.time() - start_time) >= duration_seconds:
+                    break
+
                 batch_start = time.time()
                 events_in_batch = []
 
@@ -260,6 +273,10 @@ class FinancialProducerSimulator:
 
                 # Rellenar con tráfico normal legítimo
                 target_normal_count = max(1, int(self.target_eps * 0.1))
+                if total_events_target:
+                    remaining = total_events_target - sent_events
+                    target_normal_count = min(target_normal_count, max(1, remaining))
+
                 for _ in range(target_normal_count):
                     card_id = f"CARD-{random.randint(1000, 3000)}"
                     cust_id = f"CUST-{random.randint(100, 800)}"
@@ -273,12 +290,12 @@ class FinancialProducerSimulator:
                         self.create_transaction(card_id, cust_id, city, amount, current_sim_time, channel, "NONE")
                     )
 
-                # Inyectar un lote controlado de registros corruptos/duplicados para prueba de Cuarentena
+                # Inyectar registros corruptos/duplicados para prueba de Cuarentena
                 if inject_dirty and not dirty_injected and len(events_in_batch) > 0:
                     dirty_records = self.generate_dirty_quality_records(events_in_batch[-1], current_sim_time)
                     events_in_batch.extend(dirty_records)
                     dirty_injected = True
-                    logger.info(">>> Inyectados 4 registros con anomalías de calidad (Duplicado, Null, Monto<=0, GPS inválido)")
+                    logger.info(">>> Inyectados registros con anomalías de calidad (Duplicado, Null, Monto<=0, GPS inválido)")
 
                 # Envío de eventos (a Kafka o archivo)
                 for tx in events_in_batch:
@@ -287,6 +304,11 @@ class FinancialProducerSimulator:
                     if file_handle:
                         file_handle.write(json.dumps(tx) + "\n")
                     sent_events += 1
+
+                if sent_events - last_log_events >= 50000:
+                    elapsed_now = time.time() - start_time
+                    logger.info(f"[Progreso] {sent_events:,} eventos enviados ({sent_events / elapsed_now:,.0f} EPS reales)")
+                    last_log_events = sent_events
 
                 elapsed_batch = time.time() - batch_start
                 sleep_time = 0.1 - elapsed_batch
@@ -314,6 +336,7 @@ def main():
     parser.add_argument("--topic", default=None, help="Tópico de salida")
     parser.add_argument("--eps", type=int, default=1000, help="Transacciones por segundo")
     parser.add_argument("--duration", type=int, default=12, help="Duración en segundos")
+    parser.add_argument("--total-events", type=int, default=None, help="Meta exacta de eventos (ej. 1000000)")
     parser.add_argument("--fraud-interval", type=int, default=2, help="Intervalo de inyección de fraude")
     parser.add_argument("--save-file", default=None, help="Ruta para guardar copia NDJSON")
     parser.add_argument("--no-dirty", action="store_true", help="No inyectar registros sucios de prueba")
@@ -332,6 +355,7 @@ def main():
         fraud_frequency_seconds=args.fraud_interval,
         output_file=args.save_file,
         inject_dirty=not args.no_dirty,
+        total_events_target=args.total_events,
     )
 
 

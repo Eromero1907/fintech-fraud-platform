@@ -393,6 +393,7 @@ def run_spark_streaming_job(
         .option("kafka.bootstrap.servers", kafka_servers)
         .option("subscribe", input_topic)
         .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", 50000)
         .load()
     )
 
@@ -408,6 +409,13 @@ def run_spark_streaming_job(
 
     os.makedirs(s3_raw_output, exist_ok=True)
     os.makedirs(s3_alerts_output, exist_ok=True)
+
+    from kafka import KafkaProducer
+    al_prod = KafkaProducer(
+        bootstrap_servers=kafka_servers,
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        key_serializer=lambda k: str(k).encode("utf-8"),
+    )
 
     def process_microbatch(batch_df: "DataFrame", batch_id: int):
         records = [row.asDict() for row in batch_df.collect()]
@@ -434,17 +442,11 @@ def run_spark_streaming_job(
                 for al in batch_alerts:
                     f_al.write(json.dumps(al) + "\n")
 
-            # Publicar alertas al tópico Kafka `fraud-alerts` en milisegundos
-            from kafka import KafkaProducer
-            al_prod = KafkaProducer(
-                bootstrap_servers=kafka_servers,
-                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-                key_serializer=lambda k: str(k).encode("utf-8"),
-            )
             for al in batch_alerts:
                 al_prod.send(alerts_topic, key=al["card_id"], value=al)
             al_prod.flush()
-            al_prod.close()
+
+        logger.info(f"[Micro-batch #{batch_id}] Procesados {len(records):,} eventos | Alertas CEP: {len(batch_alerts)}")
 
     query = (
         df_parsed.writeStream
