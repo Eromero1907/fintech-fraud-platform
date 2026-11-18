@@ -1,0 +1,201 @@
+<mxfile host="app.diagrams.net" modified="2026-11-18T10:07:00.000Z" agent="Diagrammer" version="24.7.17">
+  <diagram id="fintech-aws-arch" name="Arquitectura AWS Fintech Fraud">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Título Principal -->
+        <mxCell id="title_banner" value="Plataforma Fintech de Detección de Fraude y AML en Tiempo Real — Arquitectura AWS (SI3008)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="240" y="10" width="1120" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Actor Externo: Ingeniero / Auditor -->
+        <mxCell id="actor_engineer" value="Ingeniero / Auditor&#xa;(Terminal Mac SSH)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="125" width="45" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Contenedor Principal: AWS Cloud VPC -->
+        <mxCell id="vpc_box" value="AWS Cloud — VPC Propia: fintech-fraud-vpc (10.0.0.0/16) | Región: us-east-1a" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fillColor=#F8FAFC;strokeColor=#0F172A;strokeWidth=2;dashed=1;fontSize=13;fontStyle=1;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="220" y="55" width="760" height="690" as="geometry" />
+        </mxCell>
+
+        <!-- Subred Pública -->
+        <mxCell id="public_subnet" value="Subred Pública (Public Subnet) — Acceso Controlado" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontSize=12;fontStyle=1;fontColor=#065F46;" vertex="1" parent="1">
+          <mxGeometry x="245" y="95" width="710" height="145" as="geometry" />
+        </mxCell>
+
+        <mxCell id="igw_node" value="Internet Gateway&#xa;(IGW)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#059669;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="265" y="140" width="150" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bastion_node" value="ec2-fintech-bastion (t3.micro)&#xa;IP Pública | sgFintech-bastion&#xa;Puente SSH (ProxyJump :22)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#EA580C;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="455" y="140" width="230" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nat_node" value="NAT Gateway&#xa;(Salida controlada de&#xa;subred privada)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#059669;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="725" y="140" width="205" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- Subred Privada -->
+        <mxCell id="private_subnet" value="Subred Privada (Private Subnet) — Sin IPs Públicas (Aislada de Internet)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;fontSize=12;fontStyle=1;fontColor=#1E40AF;" vertex="1" parent="1">
+          <mxGeometry x="245" y="265" width="710" height="455" as="geometry" />
+        </mxCell>
+
+        <!-- EC2 Spark Processor -->
+        <mxCell id="ec2_spark_box" value="ec2-fintech-spark (t3.large)&#xa;IP Privada: 10.0.128.55 | sgFintech-spark | LabInstanceProfile" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=center;spacingTop=8;fillColor=#FFFFFF;strokeColor=#2563EB;strokeWidth=1.5;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="265" y="310" width="310" height="385" as="geometry" />
+        </mxCell>
+
+        <mxCell id="producer_node" value="financial_producer.py&#xa;Generador Financiero (~1,000 EPS)&#xa;Particionamiento por card_id&#xa;(Viaje Imposible, Bots, Pitufeo AML)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#1D4ED8;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="285" y="370" width="270" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="spark_streaming_node" value="Spark Structured Streaming (PySpark 3.5)&#xa;Motor Stateful CEP (Micro-batch 3s | Watermark 10s)&#xa;Haversine &gt;900 km/h | Ventana Bots 30s | AML 1h&#xa;Latencia promedio: 0.040 ms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="285" y="475" width="270" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="local_etl_node" value="batch_medallion_etl.py&#xa;Validación Calidad + Cuarentena + Parquet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E7FF;strokeColor=#4338CA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="285" y="595" width="270" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- EC2 Kafka Cluster -->
+        <mxCell id="ec2_kafka_box" value="ec2-fintech-kafka (t3.large)&#xa;IP Privada: 10.0.136.224 | sgFintech-kafka (19092-39092)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=center;spacingTop=8;fillColor=#FFFFFF;strokeColor=#7C3AED;strokeWidth=1.5;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="615" y="310" width="320" height="385" as="geometry" />
+        </mxCell>
+
+        <mxCell id="kafka_brokers_node" value="Clúster Apache Kafka KRaft (Docker)&#xa;kafka-1 (:19092) | kafka-2 (:29092) | kafka-3 (:39092)&#xa;Sin ZooKeeper | RF=3 | min.insync.replicas=2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#7E22CE;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="635" y="370" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="topic_tx" value="Tópico: financial-transactions&#xa;3 Particiones | ISR [1,2,3]&#xa;(10,016 eventos inyectados)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#6D28D9;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="635" y="475" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="topic_alerts" value="Tópico: fraud-alerts&#xa;3 Particiones | ISR [1,2,3]&#xa;(Alertas de bloqueo en vivo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="635" y="580" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- VPC Endpoint S3 -->
+        <mxCell id="vpce_s3" value="VPC Gateway&#xa;Endpoint S3&#xa;(Red Interna AWS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#CA8A04;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="920" y="210" width="120" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- Columna Derecha: S3 Data Lakehouse Medallion -->
+        <mxCell id="s3_box" value="Amazon S3 Data Lakehouse: s3://fintech-dl-182832138582/" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=center;spacingTop=8;fillColor=#FFFBEB;strokeColor=#D97706;strokeWidth=2;fontSize=12;fontStyle=1;fontColor=#92400E;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="55" width="480" height="310" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3_bronze" value="BRONZE (bronze/)&#xa;NDJSON Crudo: transactions/ (4.1 MiB) + fraud_alerts/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE68A;strokeColor=#B45309;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="100" width="430" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3_silver" value="SILVER (silver/) — Parquet Snappy + Reconciliación 100%&#xa;• transactions/ (0.52 MiB, -87% ahorro, part: year/month/day/country)&#xa;• quarantine/ (4 registros sucios aislados con rejection_reason)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E5E7EB;strokeColor=#4B5563;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="180" width="430" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3_gold" value="GOLD (gold/) — Tablas Analíticas Parquet Snappy&#xa;fraud_alerts_history | merchant_risk_ranking | daily_financial_kpis ($8,321.54 USD)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF08A;strokeColor=#CA8A04;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="280" width="430" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Orquestación Serverless -->
+        <mxCell id="orch_box" value="Orquestación Autónoma Serverless (AWS Academy LabRole)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=center;spacingTop=8;fillColor=#FDF2F8;strokeColor=#DB2777;strokeWidth=2;fontSize=12;fontStyle=1;fontColor=#9D174D;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="390" width="480" height="270" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eventbridge_node" value="Amazon EventBridge Scheduler&#xa;(fintech-medallion-hourly-trigger)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#BE185D;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="435" width="430" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stepfunctions_node" value="AWS Step Functions (fintech-medallion-orchestrator)&#xa;RunGlueMedallionETL (.sync) ➔ RepairSilver ➔ RepairQuarantine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBCFE8;strokeColor=#BE185D;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="510" width="430" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="glue_etl_node" value="AWS Glue 4.0 PySpark Job (fintech-medallion-etl-job | 2x G.1X)&#xa;ETL Distribuido Bronze ➔ Silver/Quarantine ➔ Gold + CloudWatch Logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="585" width="430" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Serving Analítico -->
+        <mxCell id="athena_box" value="Serving &amp; Analítica SQL Serverless" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=center;spacingTop=8;fillColor=#ECFEFF;strokeColor=#0891B2;strokeWidth=2;fontSize=12;fontStyle=1;fontColor=#155E75;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="685" width="480" height="145" as="geometry" />
+        </mxCell>
+
+        <mxCell id="glue_catalog_node" value="AWS Glue Data Catalog&#xa;BD: fintech_fraud_lakehouse (5 Tablas Parquet)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFFAFE;strokeColor=#0E7490;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="725" width="205" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="athena_node" value="Amazon Athena&#xa;Consultas SQL en vivo&#xa;Resultados ➔ athena-results/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5F3FC;strokeColor=#0E7490;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="725" width="205" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- CONECTORES (EDGES) -->
+        <mxCell id="edge_ssh_bastion" value="SSH :22" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#059669;" edge="1" parent="1" source="actor_engineer" target="igw_node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_igw_bastion" value="" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#059669;" edge="1" parent="1" source="igw_node" target="bastion_node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_bastion_spark" value="ProxyJump :22" style="endArrow=classic;html=1;rounded=1;dashed=1;strokeWidth=1.5;strokeColor=#EA580C;" edge="1" parent="1" source="bastion_node" target="ec2_spark_box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_bastion_kafka" value="ProxyJump :22" style="endArrow=classic;html=1;rounded=1;dashed=1;strokeWidth=1.5;strokeColor=#EA580C;" edge="1" parent="1" source="bastion_node" target="ec2_kafka_box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_prod_kafka" value="Produce :19092-39092" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#2563EB;" edge="1" parent="1" source="producer_node" target="topic_tx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_kafka_spark" value="Consume Stream" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#D97706;" edge="1" parent="1" source="topic_tx" target="spark_streaming_node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_spark_alerts" value="Publica Fraude" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#DC2626;" edge="1" parent="1" source="spark_streaming_node" target="topic_alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_spark_vpce" value="aws s3 sync" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#CA8A04;" edge="1" parent="1" source="ec2_spark_box" target="vpce_s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_vpce_s3" value="Tráfico Privado" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#CA8A04;" edge="1" parent="1" source="vpce_s3" target="s3_bronze">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_eb_sf" value="Dispara" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#BE185D;" edge="1" parent="1" source="eventbridge_node" target="stepfunctions_node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_sf_glue" value="Orquesta" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#7C3AED;" edge="1" parent="1" source="stepfunctions_node" target="glue_etl_node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_glue_s3" value="Lee Bronze / Escribe Silver &amp; Gold" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#7C3AED;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="glue_etl_node" target="s3_silver">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1575" y="612" />
+              <mxPoint x="1575" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_sf_athena" value="MSCK REPAIR" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#0891B2;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="stepfunctions_node" target="athena_node">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1055" y="538" />
+              <mxPoint x="1055" y="765" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_catalog_athena" value="" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#0E7490;" edge="1" parent="1" source="glue_catalog_node" target="athena_node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

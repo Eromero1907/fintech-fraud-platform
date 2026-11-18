@@ -1,0 +1,45 @@
+{
+  "Comment": "Orquestación Autónoma Medallion (SI3008): AWS Glue ETL -> Athena MSCK REPAIR TABLE (Silver & Quarantine)",
+  "StartAt": "RunGlueMedallionETL",
+  "States": {
+    "RunGlueMedallionETL": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "fintech-medallion-etl-job"
+      },
+      "Next": "RepairSilverPartitions"
+    },
+    "RepairSilverPartitions": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "MSCK REPAIR TABLE silver_transactions;",
+        "QueryExecutionContext": {
+          "Database": "fintech_fraud_lakehouse"
+        },
+        "ResultConfiguration": {
+          "OutputLocation": "s3://fintech-dl-182832138582/athena-results/"
+        }
+      },
+      "Next": "RepairQuarantinePartitions"
+    },
+    "RepairQuarantinePartitions": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "MSCK REPAIR TABLE quarantine_transactions;",
+        "QueryExecutionContext": {
+          "Database": "fintech_fraud_lakehouse"
+        },
+        "ResultConfiguration": {
+          "OutputLocation": "s3://fintech-dl-182832138582/athena-results/"
+        }
+      },
+      "Next": "PipelineSucceeded"
+    },
+    "PipelineSucceeded": {
+      "Type": "Succeed"
+    }
+  }
+}
