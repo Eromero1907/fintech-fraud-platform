@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía Interactiva — Plataforma Fintech Anti-Fraude en AWS (SI3008)</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111827;
+      --card: #1e293b;
+      --card-hover: #263449;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --pink: #ec4899;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: radial-gradient(circle at top right, #172554 0%, var(--bg) 45%);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 2.2rem 1.5rem 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.7rem;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, #f8fafc, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: var(--muted);
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: 0.98rem;
+    }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.9rem;
+      max-width: 1120px;
+      margin: 1.5rem auto 0;
+    }
+
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem;
+      text-align: center;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: 1.4rem;
+      color: var(--accent);
+    }
+
+    .kpi span {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    nav.tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 1.2rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 17, 32, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: var(--card);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.15rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.92rem;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 2rem 1.2rem 4rem;
+    }
+
+    .panel { display: none; animation: fadeIn 0.25s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .story-grid {
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .chapter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem;
+      transition: border-color 0.2s;
+    }
+
+    .chapter:hover { border-color: var(--accent); }
+
+    .chapter-head {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .chapter-head h2 {
+      font-size: 1.22rem;
+      color: #fff;
+    }
+
+    .chapter-head small {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    .analogy-box {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .analogy-box h4 {
+      color: var(--amber);
+      margin-bottom: 0.4rem;
+      font-size: 0.92rem;
+    }
+
+    .tech-box {
+      background: rgba(56, 189, 248, 0.07);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .tech-box h4 {
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+      font-size: 0.92rem;
+    }
+
+    code {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.15rem 0.4rem;
+      border-radius: 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.86em;
+      color: #7dd3fc;
+    }
+
+    /* Simulador CEP */
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    @media (max-width: 820px) {
+      .sim-layout { grid-template-columns: 1fr; }
+    }
+
+    .sim-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.3rem;
+    }
+
+    .btn-action {
+      width: 100%;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.65rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.18s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-action:hover { background: var(--card-hover); border-color: var(--accent); transform: translateX(3px); }
+    .btn-action.danger { border-left: 4px solid var(--red); }
+    .btn-action.ok { border-left: 4px solid var(--green); }
+    .btn-action.warn { border-left: 4px solid var(--amber); }
+
+    .console-log {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 1rem;
+      height: 290px;
+      overflow-y: auto;
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+    }
+
+    .log-line { margin-bottom: 0.45rem; padding: 0.3rem 0.5rem; border-radius: 6px; }
+    .log-ok { color: #86efac; background: rgba(34, 197, 94, 0.08); }
+    .log-fraud { color: #fca5a5; background: rgba(239, 68, 68, 0.14); border-left: 3px solid var(--red); }
+    .log-info { color: #93c5fd; }
+
+    .state-notebook {
+      margin-top: 1rem;
+      background: rgba(168, 85, 247, 0.09);
+      border: 1px dashed rgba(168, 85, 247, 0.45);
+      border-radius: 12px;
+      padding: 0.9rem;
+      font-size: 0.86rem;
+    }
+
+    /* Mapa Arquitectura */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
+    }
+
+    .arch-node {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .arch-node:hover, .arch-node.selected {
+      border-color: var(--accent);
+      background: var(--card-hover);
+      transform: translateY(-2px);
+    }
+    .arch-node .tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .arch-node h3 { font-size: 1rem; margin: 0.3rem 0; }
+    .arch-node p { font-size: 0.82rem; color: var(--muted); }
+
+    .inspector {
+      margin-top: 1.3rem;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 1.3rem;
+    }
+
+    /* Preguntas Profe */
+    .qa-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 0.8rem;
+      overflow: hidden;
+    }
+    .qa-q {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      padding: 1rem 1.2rem;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .qa-q:hover { background: rgba(255, 255, 255, 0.03); }
+    .qa-a {
+      display: none;
+      padding: 0 1.2rem 1.1rem;
+      color: #cbd5e1;
+      border-top: 1px solid var(--border);
+      padding-top: 0.9rem;
+    }
+    .qa-item.open .qa-a { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="badge">SI3008 — SISTEMAS INTENSIVOS EN DATOS (EAFIT)</span>
+  <h1>Plataforma Fintech Anti-Fraude en Tiempo Real sobre AWS</h1>
+  <p>Guía interactiva paso a paso: entiende cada pieza que construiste, con analogías fáciles y un simulador en vivo para romperla en la sustentación.</p>
+
+  <div class="kpi-strip">
+    <div class="kpi"><strong>10,016</strong><span>Transacciones probadas (~998 EPS)</span></div>
+    <div class="kpi"><strong>0.040 ms</strong><span>Latencia detección Stateful CEP</span></div>
+    <div class="kpi"><strong>87%</strong><span>Ahorro S3 (4.1 MiB ➔ 0.52 MiB Parquet)</span></div>
+    <div class="kpi"><strong>100.0%</strong><span>Reconciliación (Silver + Quarantine)</span></div>
+    <div class="kpi"><strong>$8,321.54</strong><span>Dólares protegidos en Zona Gold</span></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="openTab('story', this)">1. El Cuento Completo (Analogías)</button>
+  <button class="tab-btn" onclick="openTab('sim', this)">2. Simulador Interactivo CEP</button>
+  <button class="tab-btn" onclick="openTab('arch', this)">3. Mapa AWS (Haz clic en cada pieza)</button>
+  <button class="tab-btn" onclick="openTab('qa', this)">4. Preguntas Difíciles del Profe</button>
+</nav>
+
+<main>
+  <!-- TAB 1: HISTORIA CON ANALOGÍAS -->
+  <section id="story" class="panel active">
+    <div class="story-grid">
+
+      <div class="chapter">
+        <div class="chapter-head">
+          <div class="icon-box">🏰</div>
+          <div>
+            <small>Paso 1 — Red y Seguridad</small>
+            <h2>La VPC Propia: Un Barrio Cerrado con Portería y Túnel Secreto</h2>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="analogy-box">
+            <h4>🧒 Como para un niño de 10 años:</h4>
+            <p>Imagina que tienes una caja fuerte llena de dinero. ¿La dejarías en la mitad de la calle? ¡Jamás! Construyes un <strong>barrio cerrado con muralla</strong> (tu <strong>VPC</strong>). Adentro hay dos calles:</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+              <li><strong>Calle Pública (Subred Pública):</strong> La portería. Aquí vive el portero (<strong>Bastion</strong>) y la puerta por donde llegan domicilios (<strong>NAT Gateway</strong>).</li>
+              <li><strong>Calle Privada (Subred Privada):</strong> No tiene dirección hacia la calle. Nadie de afuera puede tocar el timbre. Ahí viven los trabajadores secretos (<strong>Kafka</strong> y <strong>Spark</strong>).</li>
+              <li><strong>Túnel Subterráneo (VPC Endpoint S3):</strong> Para llevar el dinero al banco (<strong>S3</strong>), no salen a la calle: usan un túnel secreto por debajo de la tierra.</li>
+            </ul>
+          </div>
+          <div class="tech-box">
+            <h4>⚙️ Lo que montaste en AWS:</h4>
+            <p>Creaste <code>fintech-fraud-vpc</code> (<code>10.0.0.0/16</code>) en <code>us-east-1a</code> — cero Default VPC.</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+              <li><code>ec2-fintech-bastion</code> (<code>t3.micro</code>, IP pública) con <code>sgFintech-bastion</code> para entrar por SSH ProxyJump.</li>
+              <li><code>ec2-fintech-kafka</code> y <code>ec2-fintech-spark</code> (<code>t3.large</code>) <strong>sin IP pública</strong>, usando <code>LabInstanceProfile</code>.</li>
+              <li><strong>S3 Gateway Endpoint</strong> en la tabla de rutas privada: tráfico directo a S3 por backbone de AWS.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapter">
+        <div class="chapter-head">
+          <div class="icon-box">📬</div>
+          <div>
+            <small>Paso 2 — Ingesta Masiva</small>
+            <h2>Apache Kafka (3 Brokers KRaft): La Oficina de Correos Irrompible</h2>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="analogy-box">
+            <h4>🧒 Como para un niño de 10 años:</h4>
+            <p>Llegan <strong>1,000 cartas por segundo</strong> con compras de tarjetas. Si solo tuvieras 1 cartero, se ahogaría. Entonces montas <strong>3 buzones mágicos gemelos</strong> (3 brokers Kafka): cada carta que entra se fotocopia en los 3 buzones. Si a un buzón le cae un rayo, los otros 2 tienen todo intacto.</p>
+            <p style="margin-top:0.4rem;">Además, todas las cartas de la tarjeta de "Pepito" siempre van por el mismo carril (<strong>partición por <code>card_id</code></strong>) para que lleguen en orden.</p>
+          </div>
+          <div class="tech-box">
+            <h4>⚙️ Lo que montaste en AWS:</h4>
+            <p>En <code>ec2-fintech-kafka</code> (<code>10.0.136.224</code>) corriste 3 contenedores Docker en modo <strong>KRaft</strong> (sin ZooKeeper) en puertos <code>19092, 29092, 39092</code>.</p>
+            <p style="margin-top:0.4rem;">Tópicos <code>financial-transactions</code> y <code>fraud-alerts</code> con <strong>3 particiones, Replication Factor = 3, <code>min.insync.replicas = 2</code></strong> e ISR saludable <code>[1,2,3]</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapter">
+        <div class="chapter-head">
+          <div class="icon-box">🕵️‍♂️</div>
+          <div>
+            <small>Paso 3 — Detección en Vivo</small>
+            <h2>Spark Streaming + Stateful CEP: El Detective con Libreta Mágica</h2>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="analogy-box">
+            <h4>🧒 Como para un niño de 10 años:</h4>
+            <p>¿Necesitas una inteligencia artificial súper pesada para saber que alguien hace trampa? ¡No! Solo necesitas un <strong>detective rapidísimo con una libreta en la mano (<em>Stateful CEP</em>)</strong>:</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+              <li><strong>Regla 1 (Teletransportación):</strong> Anota en su libreta que compraste un helado en Bogotá a las 10:00. Si a las 10:06 compras zapatos en Madrid... ¡nadie vuela a 80,000 km/h! <strong>¡Bloqueada!</strong></li>
+              <li><strong>Regla 2 (Niño tocando el timbre 10 veces):</strong> 4 compras chiquitas de $2 en menos de 30 segundos = un robot probando tarjetas robadas. <strong>¡Bloqueada!</strong></li>
+              <li><strong>Regla 3 (La alcancía tramposa - Pitufeo):</strong> Si el banco avisa a la policía por transferencias de $10 millones, el tramposo mete 3 de $9.5 millones seguidas. <strong>¡Atrapado!</strong></li>
+            </ul>
+          </div>
+          <div class="tech-box">
+            <h4>⚙️ Lo que montaste en AWS:</h4>
+            <p><code>streaming_fraud_detector.py</code> con PySpark 3.5.4 leyendo micro-batches de 3s y Watermark de 10s desde Kafka.</p>
+            <p style="margin-top:0.4rem;">Mantiene estado O(1) en memoria por <code>card_id</code> y <code>customer_id</code>, calcula distancia esférica <strong>Haversine</strong>, evalúa cada transacción en <strong>0.040 ms</strong> y publica alertas inmediatas a <code>fraud-alerts</code> vía <code>KafkaProducer</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapter">
+        <div class="chapter-head">
+          <div class="icon-box">🏅</div>
+          <div>
+            <small>Paso 4 — Almacenamiento Inteligente</small>
+            <h2>S3 Medallion Lakehouse: De Cajas Desordenadas a Lingotes de Oro</h2>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="analogy-box">
+            <h4>🧒 Como para un niño de 10 años:</h4>
+            <p>Imagina organizar tu cuarto en 3 cajas de colores:</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+              <li><strong>🥉 Bronze:</strong> Todos los juguetes tirados tal como llegaron (JSON gigante de 4.1 MiB).</li>
+              <li><strong>🏥 Quarantine (Hospital):</strong> Sacamos los 4 juguetes rotos (sin dueño, precio negativo, repetido, mapa imposible) y anotamos por qué se dañaron.</li>
+              <li><strong>🥈 Silver:</strong> Los 10,012 juguetes sanos, ordenados por país y fecha, y <strong>empacados al vacío</strong> (Parquet Snappy: ¡pesaron 87% menos!).</li>
+              <li><strong>🥇 Gold:</strong> La vitrina de trofeos: cuánto dinero salvamos ($8,321.54 USD) y qué tiendas tienen más ladrones.</li>
+            </ul>
+          </div>
+          <div class="tech-box">
+            <h4>⚙️ Lo que montaste en AWS:</h4>
+            <p>Bucket <code>s3://fintech-dl-182832138582/</code> con <code>bronze/</code>, <code>silver/transactions/</code>, <code>silver/quarantine/</code> y <code>gold/</code>.</p>
+            <p style="margin-top:0.4rem;">Compresión columnar <strong>Apache Parquet (Snappy)</strong> con particionamiento Hive (<code>year/month/day/country</code>) y <strong>Reconciliación Exacta 100%</strong> (<code>10,016 = 10,012 + 4</code>).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapter">
+        <div class="chapter-head">
+          <div class="icon-box">🤖</div>
+          <div>
+            <small>Paso 5 — Piloto Automático y Consultas</small>
+            <h2>EventBridge + Step Functions + Glue + Athena: El Robot Jefe y la Lupa</h2>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="analogy-box">
+            <h4>🧒 Como para un niño de 10 años:</h4>
+            <p>No quieres despertarte cada hora a limpiar la caja Bronze a mano. Así que contrataste 3 ayudantes automáticos:</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+              <li><strong>⏰ EventBridge:</strong> El despertador que suena cada hora.</li>
+              <li><strong>🎬 Step Functions:</strong> El director de orquesta que ordena: <em>"1. ¡Glue, limpia los datos! 2. ¡Athena, actualiza las carpetas! 3. ¡Listo!"</em>.</li>
+              <li><strong>🔍 Amazon Athena:</strong> Una lupa mágica que lee los archivos empacados al vacío en S3 y responde preguntas al instante sin tener que construir una base de datos gigante.</li>
+            </ul>
+          </div>
+          <div class="tech-box">
+            <h4>⚙️ Lo que montaste en AWS:</h4>
+            <p>Orquestación 100% Serverless con <code>LabRole</code>:</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+              <li><code>fintech-medallion-hourly-trigger</code> (EventBridge Scheduler).</li>
+              <li><code>fintech-medallion-orchestrator</code> (Step Functions) ejecutando <code>fintech-medallion-etl-job</code> (AWS Glue 4.0, 2 workers G.1X).</li>
+              <li><code>MSCK REPAIR TABLE</code> automático + 5 tablas Parquet consultadas en <strong>Athena</strong> (<code>glue_batch_20261118_140559</code>).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TAB 2: SIMULADOR INTERACTIVO CEP -->
+  <section id="sim" class="panel">
+    <div class="sim-layout">
+      <div class="sim-card">
+        <h2 style="margin-bottom:0.4rem;">🎮 Simula Transacciones en Vivo</h2>
+        <p style="color:var(--muted); font-size:0.88rem; margin-bottom:1rem;">Haz clic en los botones en orden para ver cómo piensa el detective <strong>Stateful CEP</strong> en memoria:</p>
+
+        <button class="btn-action ok" onclick="simTx('bogota')">
+          <span>1. ☕ Compra normal: Café en Bogotá ($12 USD)</span>
+          <span>Enviar ➔</span>
+        </button>
+        <button class="btn-action danger" onclick="simTx('madrid')">
+          <span>2. ✈️ ¡5 min después! Compra en Madrid ($620 USD)</span>
+          <span>Probar Regla 1 ➔</span>
+        </button>
+        <button class="btn-action danger" onclick="simTx('bots')">
+          <span>3. 🤖 Ráfaga de 4 micro-compras ($2 USD c/u en 8s)</span>
+          <span>Probar Regla 2 ➔</span>
+        </button>
+        <button class="btn-action warn" onclick="simTx('aml')">
+          <span>4. 💼 3 transferencias de $9.5M COP en 20 min</span>
+          <span>Probar Regla 3 ➔</span>
+        </button>
+        <button class="btn-action" style="justify-content:center; margin-top:0.5rem;" onclick="resetSim()">
+          🔄 Reiniciar Libreta del Detective
+        </button>
+
+        <div class="state-notebook">
+          <strong>📓 Libreta en RAM del Detective (State Store):</strong>
+          <div id="state-view" style="margin-top:0.4rem; color:#e9d5ff;">
+            Vacía todavía. Envía una transacción para ver qué recuerda Spark.
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+          <h2>📟 Consola de Spark Streaming</h2>
+          <span id="saved-counter" style="background:rgba(34,197,94,0.18); color:#86efac; padding:0.25rem 0.65rem; border-radius:8px; font-weight:700; font-size:0.85rem;">Salvado: $0.00 USD</span>
+        </div>
+        <div class="console-log" id="console-log">
+          <div class="log-line log-info">[INFO] Spark Structured Streaming CEP listo (Micro-batch: 3s, Watermark: 10s)...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: MAPA INTERACTIVO DE ARQUITECTURA -->
+  <section id="arch" class="panel">
+    <p style="color:var(--muted); margin-bottom:1rem;">Haz clic en cualquier componente de tu arquitectura para ver sus detalles técnicos reales y qué decirle al profesor:</p>
+    <div class="arch-grid">
+      <div class="arch-node selected" onclick="inspectNode('vpc', this)">
+        <div class="tag">Red & Seguridad</div>
+        <h3>VPC + Bastion + Endpoint S3</h3>
+        <p>fintech-fraud-vpc (10.0.0.0/16)</p>
+      </div>
+      <div class="arch-node" onclick="inspectNode('kafka', this)">
+        <div class="tag">Ingesta Streaming</div>
+        <h3>Kafka 3 Brokers KRaft</h3>
+        <p>10.0.136.224 (t3.large)</p>
+      </div>
+      <div class="arch-node" onclick="inspectNode('spark', this)">
+        <div class="tag">Capa Velocidad</div>
+        <h3>Spark Streaming (CEP)</h3>
+        <p>10.0.128.55 (t3.large)</p>
+      </div>
+      <div class="arch-node" onclick="inspectNode('s3', this)">
+        <div class="tag">Data Lakehouse</div>
+        <h3>S3 Medallion Parquet</h3>
+        <p>fintech-dl-182832138582</p>
+      </div>
+      <div class="arch-node" onclick="inspectNode('orch', this)">
+        <div class="tag">Automatización</div>
+        <h3>EventBridge + Step Functions + Glue</h3>
+        <p>100% Serverless (LabRole)</p>
+      </div>
+      <div class="arch-node" onclick="inspectNode('athena', this)">
+        <div class="tag">Serving SQL</div>
+        <h3>Glue Catalog + Amazon Athena</h3>
+        <p>BD: fintech_fraud_lakehouse</p>
+      </div>
+    </div>
+
+    <div class="inspector" id="inspector-box">
+      <!-- Rellenado dinámicamente por JS -->
+    </div>
+  </section>
+
+  <!-- TAB 4: PREGUNTAS DEL PROFESOR -->
+  <section id="qa" class="panel">
+    <div class="qa-item open">
+      <button class="qa-q" onclick="toggleQA(this)">1. ¿Por qué no usaron Machine Learning para detectar el fraude? <span>▼</span></button>
+      <div class="qa-a">
+        <p><strong>Respuesta técnica:</strong> En banca real, las reglas de bloqueo inmediato y cumplimiento legal (AML) deben ser 100% determinísticas, auditables y con latencia sub-milisegundo (0.040 ms). Con <strong>Stateful CEP</strong> no dependemos de reentrenamientos ni de cajas negras, y el foco del curso SI3008 es la ingeniería de datos distribuida.</p>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <button class="qa-q" onclick="toggleQA(this)">2. ¿Por qué no usaron Amazon Data Firehose en lugar de Spark para escribir en S3? <span>▼</span></button>
+      <div class="qa-a">
+        <p><strong>Respuesta técnica:</strong> Firehose está diseñado para Kinesis y es <em>stateless</em> (no recuerda compras anteriores de una tarjeta ni puede calcular Haversine en vivo). Además, Firehose no puede conectarse directamente a un clúster Kafka autogestionado dentro de una subred privada de EC2. Spark Streaming resuelve el Stateful CEP y la persistencia al mismo tiempo.</p>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <button class="qa-q" onclick="toggleQA(this)">3. ¿Qué pasa si se cae uno de los 3 brokers de Kafka durante una ráfaga de transacciones? <span>▼</span></button>
+      <div class="qa-a">
+        <p><strong>Respuesta técnica:</strong> Nada se pierde. Configuramos <code>Replication Factor = 3</code> y <code>min.insync.replicas = 2</code>. Si <code>kafka-2</code> muere, los otros dos brokers (quórum) siguen cumpliendo el mínimo de réplicas en sincronía y KRaft reasigna los líderes de partición en segundos.</p>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <button class="qa-q" onclick="toggleQA(this)">4. ¿Para qué sirve particionar Kafka por <code>card_id</code> y S3 Silver por <code>country</code>? <span>▼</span></button>
+      <div class="qa-a">
+        <p><strong>Respuesta técnica:</strong> Son dos optimizaciones distintas: en Kafka, particionar por <code>card_id</code> garantiza el orden cronológico estricto de todas las compras de una misma tarjeta para el CEP. En S3 Silver, particionar por <code>year/month/day/country</code> habilita <em>Partition Pruning</em> en Amazon Athena: si consultamos fraudes en Colombia, Athena no escanea los archivos de USA, España o México.</p>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <button class="qa-q" onclick="toggleQA(this)">5. ¿Cómo garantizan que no se pierdan datos si llegan registros corruptos o repetidos? <span>▼</span></button>
+      <div class="qa-a">
+        <p><strong>Respuesta técnica:</strong> Implementamos el patrón de <strong>Zona de Cuarentena + Reconciliación Exacta del 100%</strong>. Nuestro ETL en AWS Glue deduplica por <code>transaction_id</code>, valida nulidad, montos &gt; 0 y rango GPS válido; los registros malos se aíslan en <code>silver/quarantine/</code> con su <code>rejection_reason</code> y verificamos matemáticamente que <code>Total Bronze (10,016) == Silver (10,012) + Quarantine (4)</code>.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function openTab(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // Simulador CEP
+  let lastCity = null;
+  let totalSaved = 0;
+
+  function addLog(msg, cls) {
+    const box = document.getElementById('console-log');
+    const div = document.createElement('div');
+    div.className = 'log-line ' + cls;
+    div.textContent = msg;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function updateSaved(amount) {
+    totalSaved += amount;
+    document.getElementById('saved-counter').textContent = `Salvado: $${totalSaved.toLocaleString('en-US', {minimumFractionDigits:2})} USD`;
+  }
+
+  function simTx(type) {
+    const nb = document.getElementById('state-view');
+    if (type === 'bogota') {
+      lastCity = { city: 'Bogotá', lat: 4.71, lon: -74.07, time: '10:00:00' };
+      addLog('[OK] CARD-1001 | $12.00 USD en Bogotá (10:00:00) -> APROBADA. Guardada en libreta.', 'log-ok');
+      nb.innerHTML = '• <code>CARD-1001</code>: Última ubicación = <b>Bogotá</b> (4.71, -74.07) a las <b>10:00:00</b>.';
+    } else if (type === 'madrid') {
+      if (!lastCity) {
+        addLog('[INFO] Primero presiona el botón 1 (Bogotá) para que el detective recuerde dónde estaba la tarjeta.', 'log-info');
+        return;
+      }
+      addLog('[ALERTA BLOQUEO] IMPOSSIBLE_TRAVEL en CARD-1001! Bogotá ➔ Madrid = 8,013 km en 5 min (96,156 km/h > 900 km/h). ¡BLOQUEADA!', 'log-fraud');
+      updateSaved(620);
+      nb.innerHTML += '<br>• 🚨 <b>Estado:</b> Alerta publicada a <code>fraud-alerts</code> en 0.04 ms.';
+    } else if (type === 'bots') {
+      addLog('[ALERTA BLOQUEO] BOT_BURST_CARD_TESTING en CARD-BOT-8149! 4 micro-compras ($2.00 USD c/u) en < 30s. ¡RÁFAGA BLOQUEADA!', 'log-fraud');
+      updateSaved(8);
+      nb.innerHTML = '• <code>CARD-BOT-8149</code>: Ventana deslizante 30s alcanzó <b>4 micro-transacciones (<= $5)</b> ➔ Bloqueada y reiniciada.';
+    } else if (type === 'aml') {
+      addLog('[ALERTA AML] AML_STRUCTURING en CUST-SMURF-536! 3 transferencias de $9.5M COP en 20 min (Total: $28.5M COP). ¡MARCADA PARA AUDITORÍA!', 'log-fraud');
+      updateSaved(6951.21);
+      nb.innerHTML = '• <code>CUST-SMURF-536</code>: Ventana 1h detectó <b>3 transferencias entre $9M-$9.99M COP</b> (evasión de tope $10M).';
+    }
+  }
+
+  function resetSim() {
+    lastCity = null;
+    totalSaved = 0;
+    document.getElementById('saved-counter').textContent = 'Salvado: $0.00 USD';
+    document.getElementById('console-log').innerHTML = '<div class="log-line log-info">[INFO] Memoria reiniciada. Listo para nuevas pruebas...</div>';
+    document.getElementById('state-view').textContent = 'Vacía todavía. Envía una transacción para ver qué recuerda Spark.';
+  }
+
+  // Inspector Arquitectura
+  const archDetails = {
+    vpc: {
+      title: '🏰 Red Propia: fintech-fraud-vpc (10.0.0.0/16)',
+      tech: 'Subred Pública (IGW + NAT Gateway + Bastion t3.micro) + Subred Privada (sin IPs públicas) + VPC Gateway Endpoint S3 + 3 Security Groups.',
+      say: '“Aislamos Kafka y Spark en una subred privada sin salida ni entrada pública desde internet; solo entramos por SSH ProxyJump y S3 viaja por la red interna de AWS.”'
+    },
+    kafka: {
+      title: '📬 Clúster Apache Kafka KRaft (3 Brokers)',
+      tech: 'ec2-fintech-kafka (10.0.136.224, t3.large). Contenedores kafka-1 (:19092), kafka-2 (:29092), kafka-3 (:39092). Tópicos con 3 particiones, RF=3 y min.insync.replicas=2.',
+      say: '“Usamos modo KRaft sin ZooKeeper. Particionamos por card_id para garantizar orden temporal y con RF=3 soportamos la caída de un broker sin perder mensajes.”'
+    },
+    spark: {
+      title: '🕵️‍♂️ Motor Spark Structured Streaming (Stateful CEP)',
+      tech: 'ec2-fintech-spark (10.0.128.55, t3.large, LabInstanceProfile). Micro-batches de 3s, Watermark de 10s, evaluación Haversine y ventanas CEP en 0.040 ms.',
+      say: '“En un solo motor procesamos reglas con estado en memoria, publicamos alertas en tiempo real a fraud-alerts y volcamos el crudo a Bronze.”'
+    },
+    s3: {
+      title: '🏅 Data Lakehouse Medallion: s3://fintech-dl-182832138582/',
+      tech: 'bronze/ (JSON 4.1 MiB) ➔ silver/transactions/ (Parquet Snappy 0.52 MiB, -87%) + silver/quarantine/ (4 registros) ➔ gold/ ($8,321.54 USD protegidos).',
+      say: '“Convertir a Parquet Snappy ahorró un 87% de espacio y la Zona de Cuarentena nos dio reconciliación exacta del 100% (10,016 = 10,012 + 4).”'
+    },
+    orch: {
+      title: '🤖 Orquestación Autónoma Serverless',
+      tech: 'EventBridge Scheduler (fintech-medallion-hourly-trigger) ➔ Step Functions (fintech-medallion-orchestrator) ➔ AWS Glue 4.0 (2x G.1X) ➔ Athena MSCK REPAIR.',
+      say: '“Incluso si las instancias EC2 están apagadas, EventBridge y Step Functions disparan el ETL distribuido en AWS Glue y actualizan las particiones de Athena.”'
+    },
+    athena: {
+      title: '🔍 Serving Analítico: AWS Glue Catalog + Amazon Athena',
+      tech: 'Base de datos fintech_fraud_lakehouse con 5 tablas externas Parquet Snappy consultadas por SQL directo sobre S3.',
+      say: '“Consultamos el dinero salvado por cada regla y la auditoría de cuarentena en segundos, sin mantener servidores de bases de datos encendidos.”'
+    }
+  };
+
+  function inspectNode(key, el) {
+    document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('selected'));
+    el.classList.add('selected');
+    const info = archDetails[key];
+    document.getElementById('inspector-box').innerHTML = `
+      <h3 style="color:var(--accent); margin-bottom:0.5rem;">${info.title}</h3>
+      <p style="margin-bottom:0.6rem;"><strong>Detalle Técnico:</strong> ${info.tech}</p>
+      <p style="color:#fde68a;"><strong>💬 Qué decirle al profesor:</strong> ${info.say}</p>
+    `;
+  }
+
+  function toggleQA(btn) {
+    btn.parentElement.classList.toggle('open');
+  }
+
+  // Inicializar inspector
+  inspectNode('vpc', document.querySelector('.arch-node.selected'));
+</script>
+
+</body>
+</html>
