@@ -392,7 +392,7 @@ def run_spark_streaming_job(
         .format("kafka")
         .option("kafka.bootstrap.servers", kafka_servers)
         .option("subscribe", input_topic)
-        .option("startingOffsets", "latest")
+        .option("startingOffsets", "earliest")
         .load()
     )
 
@@ -434,18 +434,17 @@ def run_spark_streaming_job(
                 for al in batch_alerts:
                     f_al.write(json.dumps(al) + "\n")
 
-            # Publicar también al tópico Kafka `fraud-alerts`
-            alerts_json_RDD = spark.sparkContext.parallelize([json.dumps(a) for a in batch_alerts])
-            alerts_df = spark.read.json(alerts_json_RDD)
-            (
-                alerts_df
-                .selectExpr("CAST(card_id AS STRING) AS key", "to_json(struct(*)) AS value")
-                .write
-                .format("kafka")
-                .option("kafka.bootstrap.servers", kafka_servers)
-                .option("topic", alerts_topic)
-                .save()
+            # Publicar alertas al tópico Kafka `fraud-alerts` en milisegundos
+            from kafka import KafkaProducer
+            al_prod = KafkaProducer(
+                bootstrap_servers=kafka_servers,
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                key_serializer=lambda k: str(k).encode("utf-8"),
             )
+            for al in batch_alerts:
+                al_prod.send(alerts_topic, key=al["card_id"], value=al)
+            al_prod.flush()
+            al_prod.close()
 
     query = (
         df_parsed.writeStream

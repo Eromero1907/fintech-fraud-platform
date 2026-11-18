@@ -31,10 +31,11 @@ kafka:
   partitions: 3
 
 s3_medallion:
-  bucket: "book-store-datalake-182832138582"
-  prefix: "fintech_project"
-  raw_path: "raw/transactions"
-  silver_path: "silver/transactions_curated"
+  bucket: "fintech-dl-182832138582"
+  prefix: ""
+  raw_path: "bronze/transactions"
+  silver_path: "silver/transactions"
+  quarantine_path: "silver/quarantine"
   gold_fraud_alerts: "gold/fraud_alerts_history"
   gold_merchant_risk: "gold/merchant_risk_ranking"
   gold_kpis: "gold/daily_financial_kpis"

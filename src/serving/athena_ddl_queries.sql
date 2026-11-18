@@ -2,7 +2,7 @@
 -- Amazon Athena / AWS Glue Data Catalog DDL & Consultas Analíticas de Sustentación
 -- Proyecto: Plataforma Fintech de Detección de Fraude y AML en Tiempo Real
 -- Estándar: Formato Columnar Apache Parquet con Compresión Snappy y Particiones Hive
--- Bucket S3: s3://book-store-datalake-182832138582/fintech_project/
+-- Bucket S3: s3://fintech-dl-182832138582/
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS silver_transactions (
 )
 PARTITIONED BY (year STRING, month STRING, day STRING, country STRING)
 STORED AS PARQUET
-LOCATION 's3://book-store-datalake-182832138582/fintech_project/silver/transactions_curated/'
+LOCATION 's3://fintech-dl-182832138582/silver/transactions/'
 TBLPROPERTIES ('parquet.compression'='SNAPPY', 'classification'='parquet');
 
 -- Descubrimiento automático de particiones Hive en S3
@@ -73,7 +73,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS quarantine_transactions (
 )
 PARTITIONED BY (ingestion_date STRING)
 STORED AS PARQUET
-LOCATION 's3://book-store-datalake-182832138582/fintech_project/quarantine/transactions/'
+LOCATION 's3://fintech-dl-182832138582/silver/quarantine/'
 TBLPROPERTIES ('parquet.compression'='SNAPPY', 'classification'='parquet');
 
 MSCK REPAIR TABLE quarantine_transactions;
@@ -97,7 +97,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS gold_fraud_alerts (
     status STRING
 )
 STORED AS PARQUET
-LOCATION 's3://book-store-datalake-182832138582/fintech_project/gold/fraud_alerts_history/'
+LOCATION 's3://fintech-dl-182832138582/gold/fraud_alerts_history/'
 TBLPROPERTIES ('parquet.compression'='SNAPPY', 'classification'='parquet');
 
 -- ------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS gold_merchant_risk (
     fraud_volume_usd DOUBLE
 )
 STORED AS PARQUET
-LOCATION 's3://book-store-datalake-182832138582/fintech_project/gold/merchant_risk_ranking/'
+LOCATION 's3://fintech-dl-182832138582/gold/merchant_risk_ranking/'
 TBLPROPERTIES ('parquet.compression'='SNAPPY', 'classification'='parquet');
 
 -- ------------------------------------------------------------------------------
@@ -121,8 +121,8 @@ TBLPROPERTIES ('parquet.compression'='SNAPPY', 'classification'='parquet');
 -- ------------------------------------------------------------------------------
 CREATE EXTERNAL TABLE IF NOT EXISTS gold_daily_kpis (
     batch_id STRING,
-    ingestion_date STRING,
-    execution_timestamp STRING,
+    ingestion_date DATE,
+    execution_timestamp TIMESTAMP,
     total_raw_records BIGINT,
     total_curated_silver_records BIGINT,
     total_quarantine_records BIGINT,
@@ -135,7 +135,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS gold_daily_kpis (
     avg_detection_latency_ms DOUBLE
 )
 STORED AS PARQUET
-LOCATION 's3://book-store-datalake-182832138582/fintech_project/gold/daily_financial_kpis/'
+LOCATION 's3://fintech-dl-182832138582/gold/daily_financial_kpis/'
 TBLPROPERTIES ('parquet.compression'='SNAPPY', 'classification'='parquet');
 
 
